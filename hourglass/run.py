@@ -80,8 +80,8 @@ def main(argv=None):
           f"Trend lines fitted over FY{Y[0]}-FY{L}. Projection starts {base.start:%d %B %Y}, monthly, {a.years} years.", "",
           "Not a Treasury, Federal Reserve, or CBO product. Not financial, investment, budget, or policy advice.", "",
           "## Headline", "",
-          f"- Starting debt D0: ${H['D0']:.3f} T (GFDEBTN, {H['D0_date']})",
-          f"- FY{L} receipts: ${H['REC'][L]:.3f} T; net interest: ${H['NI'][L]:.3f} T; primary deficit: ${H['PRIM'][L]:+.3f} T",
+          f"- Starting debt D0: ${H['D0']:.3f} T (Treasury Debt to the Penny, {H['D0_date']}); FY{L} year-end debt ${H['DEBT'][L]:.3f} T",
+          f"- FY{L} receipts: ${H['REC'][L]:.3f} T; net interest: ${H['NI'][L]:.3f} T{' (estimated)' if L in H['est'] else ''}; primary deficit: ${H['PRIM'][L]:+.3f} T",
           f"- FY{L} interest-to-revenue (I/R): {H['IR'][L]:.1f}%; effective rate r0: {r0:.3f}%",
           f"- Currency in circulation: ${C['currcir_last'][1]/1000:.3f} T ({C['currcir_last'][0]}), {C['currcir_yoy']:+.1f}% year on year",
           f"- Observed NIPA interest / receipts ({C['nipa_last'][0]}): {C['nipa_last'][1]/C['nipa_last'][2]*100:.1f}% "
@@ -108,11 +108,12 @@ def main(argv=None):
     md += ["", "## Historic data (FRED)", "", "| FY | Receipts $T | Outlays $T | Net interest $T | Primary deficit $T | Gross debt $T | Eff. rate % | I/R % |", "| --- | --- | --- | --- | --- | --- | --- | --- |"]
     hist = []
     for y in Y:
-        hist.append([f"{y}{'p' if H['prelim'] and y == L else ''}", f"{H['REC'][y]:.3f}", f"{H['OUT'][y]:.3f}", f"{H['NI'][y]:.3f}", f"{H['PRIM'][y]:+.3f}",
+        hist.append([str(y), f"{H['REC'][y]:.3f}", f"{H['OUT'][y]:.3f}", f"{H['NI'][y]:.3f}{'*' if y in H['est'] else ''}", f"{H['PRIM'][y]:+.3f}",
                      f"{H['DEBT'][y]:.2f}", f"{H['RATE'][y]:.3f}" if y in H["RATE"] else "n/a", f"{H['IR'][y]:.1f}"])
         md.append("| " + " | ".join(hist[-1]) + " |")
     md += [""] + [f"Note: {n}" for n in H["notes"]] + ["", "![I/R chart](chart_interest_to_revenue.png)", "", "![Context](chart_observed_context.png)", "",
-           "## FRED series", ""] + [f"- `{s}`: {d[0]} ({d[1]}, {d[2]}) - https://fred.stlouisfed.org/series/{s}" for s, d in fred.SERIES.items()]
+           "## Data series", ""] + [f"- `{s}`: {d[0]} ({d[1]}, {d[2]}) - https://fred.stlouisfed.org/series/{s}" for s, d in fred.SERIES.items()] + [
+           f"- Treasury Debt to the Penny (total public debt outstanding, daily, $) - {fred.DTP_URL}"]
     open(os.path.join(a.out, "report.md"), "w").write("\n".join(md) + "\n")
     summary = dict(run_date=today.isoformat(), D0=H["D0"], D0_date=H["D0_date"], last_fy=L, receipts=H["REC"][L], net_interest=H["NI"][L],
                    IR=H["IR"][L], r0=r0, gR=gR, dr=dr, drC=drC, bS=bS, s0=s0, currcir=C["currcir_last"],

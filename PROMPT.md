@@ -18,16 +18,16 @@ grows relative to revenue and finds the calculated moment when that ratio stops 
 compounding at a rising rate (the trend line "turns parabolic").
 
 **Data (FRED, Federal Reserve Bank of St. Louis, https://fred.stlouisfed.org).** Fiscal years end 30 September.
-- `FYFR` federal receipts, `FYONET` federal net outlays, `FYOINT` federal net interest, `FYGFD` gross federal debt (annual, fiscal year).
-- `MTSR133FMS`, `MTSO133FMS` monthly Treasury receipts and outlays (to build the newest fiscal year before the annual series updates).
-- `GFDEBTN` total public debt (latest quarterly value = starting debt D0).
-- `A091RC1Q027SBEA` federal interest payments and `FGRECPT` federal current receipts (quarterly, SAAR): observed interest-to-receipts check, and the growth factor used to estimate net interest for a preliminary fiscal year.
+- `FYFR` federal receipts, `FYONET` Federal Net Outlays (total outlays), `FYOINT` Federal Outlays: Interest (annual, fiscal year).
+- `MTSR133FMS`, `MTSO133FMS` monthly Treasury receipts and outlays: the 12-month sum is the newest fiscal year's actual receipts and outlays before the annual series updates.
+- Debt: US Treasury Debt to the Penny (https://fiscaldata.treasury.gov/datasets/debt-to-the-penny/), total public debt outstanding. Use its last record of each fiscal year for every year's debt, and its latest daily value as D0. Use this one concept throughout. (FRED `FYGFD`/`GFDEBTN` are reference only.)
+- `A091RC1Q027SBEA` federal interest payments and `FGRECPT` federal current receipts (quarterly, SAAR): observed interest-to-receipts check, and the growth factor used to estimate interest for the newest fiscal year (label that one value as an estimate).
 - `CURRCIR` currency in circulation: reported as context (level and year-on-year change). It is not an input to the recurrences.
 
 **Step 1 - history, FY2000 to the latest fiscal year.** For each year compute
-primary deficit P = outlays - receipts - net interest (negative = primary surplus),
-effective rate r = net interest / average of this and last year's gross debt (percent),
-and the ratio q = net interest / receipts (percent).
+primary deficit P = outlays - receipts - interest (negative = primary surplus),
+effective rate r = interest / average of this and last year's fiscal-year-end debt (percent),
+and the ratio q = interest / receipts (percent).
 
 **Step 2 - fit trend lines by ordinary least squares over the full window.**
 - Receipts: log-linear, giving annual growth g_R = exp(slope) - 1.
@@ -36,7 +36,7 @@ and the ratio q = net interest / receipts (percent).
 - Report each R^2. Gross debt CAGR is reported for reference only.
 
 **Step 3 - initialize at 1 October after the latest fiscal year.**
-D0 = latest total public debt; R0 = latest fiscal-year receipts; s0 = latest actual share P/R (no jump to the fitted level);
+D0 = latest daily Debt to the Penny; R0 = latest fiscal-year receipts; s0 = latest actual share P/R (no jump to the fitted level);
 r0 = latest effective rate.
 
 **Step 4 - run the recurrences monthly for 40 years, in nominal dollars (inflation already included):**
